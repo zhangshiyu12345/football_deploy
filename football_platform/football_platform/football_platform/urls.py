@@ -14,11 +14,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path,include
+from django.urls import path, include, re_path
+from django.views.decorators.cache import cache_page
 from rest_framework import routers
 from django.conf import settings
 from django.conf.urls.static import static
-from user.views import UserViewSet, UserCreateViewSet, MyObtainTokenPairView, UserInfoViewSet, UploadAvatarView,UserUpdateViewSet
+from user.views import UserViewSet, UserCreateViewSet, MyObtainTokenPairView, UserInfoViewSet, UploadAvatarView,UserUpdateViewSet,UserInfo
 
 # 导入 simplejwt 提供的几个验证视图类
 from rest_framework_simplejwt.views import (
@@ -30,7 +31,7 @@ router_V1 = routers.DefaultRouter()
 router_V1.register('info', UserInfoViewSet)
 router_V1.register('user_activate', UserCreateViewSet)
 router_V1.register('users_create',UserCreateViewSet)
-router_V1.register(r'users', UserViewSet)
+router_V1.register(r'users',UserViewSet)
 
 
 urlpatterns = [
@@ -42,4 +43,5 @@ urlpatterns = [
     path('api/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/avatar/', UploadAvatarView.as_view(), name='upload_avatar'),
     path('api/user_update/<int:id>/', UserUpdateViewSet.as_view(), name="user_update"),
+    path('api/userinfo/<str:username>/', UserInfo.as_view()),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

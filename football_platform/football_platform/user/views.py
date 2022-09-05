@@ -1,7 +1,9 @@
 import os
 
 from IPython.core.display import JSON
+from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet
 
 from football_platform import settings
 from .models import NewUser
@@ -13,6 +15,8 @@ from django.core.mail import send_mail
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import AllowAny
 from .serializers import MyTokenObtainPairSerializer
+from django.core.cache import cache
+from django.views.decorators.cache import cache_page #在视图函数中使用,将视图结果存入缓存
 import json
 # Create your views here.
 
@@ -38,7 +42,7 @@ class MyObtainTokenPairView(TokenObtainPairView):
 class UserInfoViewSet(viewsets.ViewSet):
     queryset = NewUser.objects.all().order_by('-date_joined')
     http_method_names = ['get']
-
+    @cache_page(300)  # 5分钟
     def list(self, request, *args, **kwargs):
         print('ok')
         user_info = NewUser.objects.filter(id=request.user.id).values()[0]
@@ -57,9 +61,13 @@ class UserInfoViewSet(viewsets.ViewSet):
         return Response(user_info)
 
 #获取所有用户信息
+#@cache_page(300) #5分钟
 class UserViewSet(viewsets.ModelViewSet):
     queryset = NewUser.objects.all()
     serializer_class = UserSerializer
+
+
+
 
 class UserCreateViewSet(viewsets.ModelViewSet):
     queryset = NewUser.objects.all()
@@ -78,7 +86,9 @@ class UserCreateViewSet(viewsets.ModelViewSet):
         return Response(data, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        #get_serializer:获取序列化对象
+        serializer = self.get_serializer(data=request.data)#在内部实现了get_serializer_class()(获取序列化类)
+        #或者:serialzer = self.get_serializer_class()(data=request.data)
         serializer.is_valid(raise_exception=True)
         user_info = self.perform_create(serializer)
         user_info.set_password(request.data['password'])
@@ -119,7 +129,7 @@ class UploadAvatarView(APIView):
             }
             return Response(data)
 
-class UserUpdateViewSet(APIView):
+class UserUpdateViewSet(GenericAPIView):
     queryset = NewUser.objects.all()
     serializer_class = UpdateUserSerializer
     http_method_names = ['put']
@@ -133,5 +143,24 @@ class UserUpdateViewSet(APIView):
             return Response(validated_data.data)
         else:
             return Response(validated_data.errors)
+
+#获取个人信息
+class UserInfo(APIView):
+    @cache_page(300)  # 5分钟
+    def get(self,request,username):
+        user_info = NewUser.objects.filter(username=username).values()[0]
+        print(type(user_info))
+        position = int(user_info['position'])
+        sex = int(user_info['sex'])
+        avatar = user_info['avatar']
+        print(avatar)
+        user_info['avatar'] = get_avatar_url(avatar)
+        user_info['position'] = Position[position]
+        user_info['sex'] = Sex[sex]
+        print(user_info['avatar'])
+        #serializer = UserSerializer(instance=user_info, many=False)
+        return Response(user_info)
+
+
 
 

@@ -164,3 +164,18 @@ EMAIL_HOST = 'smtp.163.com'
 EMAIL_PORT = 25
 EMAIL_HOST_USER = '15016299762@163.com' #发送的邮箱
 EMAIL_HOST_PASSWORD = 'TCFYDIWTREVUPYRD'
+
+#django-redis缓存
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "PASSWORD": "245478",
+        }
+    }
+}
+#方式一　cache.set/get 具备序列化和反序列化
+#方式二 原生redis操作
+#方式三 装饰器

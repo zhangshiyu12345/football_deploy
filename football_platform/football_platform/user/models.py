@@ -41,6 +41,12 @@ class NewUser(AbstractUser):
     weight = models.FloatField(verbose_name='体重', null=True)
     stature = models.FloatField(verbose_name='身高',null=True)
     position = models.CharField(verbose_name='位置',choices=Position, null=True,max_length=32)
+    pass_football = models.FloatField(verbose_name='传球',default=0)
+    hotshot = models.FloatField(verbose_name='射门',default=0)
+    body = models.FloatField(verbose_name='身体',default=0)
+    defend = models.FloatField(verbose_name='防守',default=0)
+    speed = models.FloatField(verbose_name='速度',default=0)
+    control = models.FloatField(verbose_name='盘带',default=0)
     score = models.FloatField(verbose_name='总评',default=0)
     create_time = models.DateTimeField(verbose_name='创建时间',default=datetime.now)
 

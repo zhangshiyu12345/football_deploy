@@ -1,17 +1,53 @@
 <template>
-  <div class="app-container">
-    <el-input v-model="filterText" placeholder="Filter keyword" style="margin-bottom:30px;" />
+  <el-card class="box-card">
 
-    <el-tree
-      ref="tree2"
-      :data="data2"
-      :props="defaultProps"
-      :filter-node-method="filterNode"
-      class="filter-tree"
-      default-expand-all
-    />
+    <div style="display: flex; justify-content: center;">
+      <div>
+        <el-image style="width: 250px; height: 250px" :src="avatar"></el-image>
+        <div style="margin-top:10px;">
+          <el-input v-model="input1" placeholder="搜索姓名" class="inp1"></el-input>
+          <el-button type="primary" @click="UserInfoData1">搜索</el-button>
+        </div>
+      </div>
 
-  </div>
+      <div style="margin-left:200px;">
+        <el-image style="width: 250px; height: 250px" :src="avatar1"></el-image>
+        <div style="margin-top:10px;">
+          <el-input v-model="input2" placeholder="搜索姓名" class="inp2"></el-input>
+          <el-button type="primary" @click="UserInfoData2">搜索</el-button>
+        </div>
+      </div>
+    </div>
+
+    <!--分割线-->
+    <el-divider></el-divider>
+
+    <el-table :data="tableData" stripe style="width: 100%" :cell-style="cellStyle">
+      <el-table-column prop="title" width="480" show-header="false">
+        
+      </el-table-column>
+      <el-table-column prop="score1" width="480" show-header="false">
+         <template slot-scope="scope">
+          <span :style="{color:scope.row.score1 > scope.row.score2 ?'green':'black' }">
+            {{scope.row.score1}}
+          </span>
+          <i class="el-icon-top" :style="{display:scope.row.score1 > scope.row.score2 ?'inline':'none',color:scope.row.score1 > scope.row.score2 ?'green':'black' }"></i>
+          <span :style="{display:scope.row.score1 > scope.row.score2 ?'inline':'none',color:scope.row.score1 > scope.row.score2 ?'green':'black'}">{{scope.row.score1 - scope.row.score2}}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column prop="score2" width="480" show-header="false">
+        <template slot-scope="scope">
+          <span :style="{color:scope.row.score1 < scope.row.score2 ?'green':'black' }">
+            {{scope.row.score2}}
+          </span>
+          <i class="el-icon-top" :style="{display:scope.row.score1 < scope.row.score2 ?'inline':'none',color:scope.row.score1 < scope.row.score2 ?'green':'black' }"></i>
+          <span :style="{display:scope.row.score1 < scope.row.score2 ?'inline':'none',color:scope.row.score1 < scope.row.score2 ?'green':'black' }">{{scope.row.score2 - scope.row.score1}}</span>
+        </template>
+      
+      </el-table-column>
+    </el-table>
+  </el-card>
 </template>
 
 <script>
@@ -19,60 +55,99 @@ export default {
 
   data() {
     return {
-      filterText: '',
-      data2: [{
-        id: 1,
-        label: 'Level one 1',
-        children: [{
-          id: 4,
-          label: 'Level two 1-1',
-          children: [{
-            id: 9,
-            label: 'Level three 1-1-1'
-          }, {
-            id: 10,
-            label: 'Level three 1-1-2'
-          }]
-        }]
-      }, {
-        id: 2,
-        label: 'Level one 2',
-        children: [{
-          id: 5,
-          label: 'Level two 2-1'
-        }, {
-          id: 6,
-          label: 'Level two 2-2'
-        }]
-      }, {
-        id: 3,
-        label: 'Level one 3',
-        children: [{
-          id: 7,
-          label: 'Level two 3-1'
-        }, {
-          id: 8,
-          label: 'Level two 3-2'
-        }]
-      }],
-      defaultProps: {
-        children: 'children',
-        label: 'label'
-      }
+      tableData:[{
+          title: '身体',
+          score1: '0',
+          score2: '0'
+        },{
+          title: '防守',
+          score1: '0',
+          score2: '0'
+        },{
+          title: '速度',
+          score1: '0',
+          score2: '0'
+        },{
+          title: '射门',
+          score1: '0',
+          score2: '0'
+        },{
+          title: '盘带',
+          score1: '0',
+          score2: '0'
+        },{
+          title: '传球',
+          score1: '0',
+          score2: '0'
+        },{
+          title: '总评',
+          score1: '0',
+          score2: '0'
+        },],
+      input1: '',
+      input2: '',
+      avatar: 'http://127.0.0.1:8000/media/avatar/default.jpg',
+      avatar1: 'http://127.0.0.1:8000/media/avatar/default.jpg',
+      token: '',
     }
   },
-  watch: {
-    filterText(val) {
-      this.$refs.tree2.filter(val)
-    }
+  methods:{
+    async UserInfoData1(){
+       let result = await this.$API.user.UserInfo(this.token,this.input1)
+       if(result.status == 200){
+           this.avatar = result.data.avatar
+           this.tableData[0].score1 = result.data.body
+           this.tableData[1].score1 = result.data.defend
+           this.tableData[2].score1 = result.data.speed
+           this.tableData[3].score1 = result.data.hotshot
+           this.tableData[4].score1 = result.data.control
+           this.tableData[5].score1 = result.data.pass_football
+           this.tableData[6].score1 = result.data.score
+       }
+    },
+    async UserInfoData2(){
+       let result = await this.$API.user.UserInfo(this.token,this.input2)
+       if(result.status == 200){
+          this.avatar1 = result.data.avatar
+          this.tableData[0].score2 = result.data.body
+          this.tableData[1].score2 = result.data.defend
+          this.tableData[2].score2 = result.data.speed
+          this.tableData[3].score2 = result.data.hotshot
+          this.tableData[4].score2 = result.data.control
+          this.tableData[5].score2 = result.data.pass_football
+          this.tableData[6].score2 = result.data.score
+       }
+    },
+    Token(){
+      return this.$store.getters.token;
+    },
   },
-
-  methods: {
-    filterNode(value, data) {
-      if (!value) return true
-      return data.label.indexOf(value) !== -1
-    }
-  }
+  mounted(){
+    this.token = this.Token()
+  },
 }
 </script>
+
+<style>
+  .box-card {
+    width: 1540px;
+    height: 800px;
+    margin-top: 20px;
+    margin-left: 20px;
+  }
+  .inp1{
+    width: 180px;
+    margin-right: 5px;
+  }
+  .inp2{
+    width: 180px;
+    margin-right: 5px;
+  }
+  .black{
+    color:black;
+  }
+  .green{
+    color: green;
+  }
+</style>
 

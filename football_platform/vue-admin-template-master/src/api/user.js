@@ -50,9 +50,20 @@ export function updateInfo(data,id){
 }
 
 //获取所有用户信息
-export function AllUserInfo(){
+export function AllUserInfo(token){
   return request({
-    url:'/api/'
+    url:'/api/users/',
+    method: 'get',
+    params: { token }
+  })
+}
+
+//获取单个用户信息
+export function UserInfo(token,username){
+  return request({
+    url:'/api/userinfo/' + username + '/',
+    method: 'get',
+    params:{token}
   })
 }
 
