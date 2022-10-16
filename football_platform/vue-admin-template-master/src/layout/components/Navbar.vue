@@ -5,6 +5,23 @@
     <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
+    
+      <el-button @click="drawer = true" type="primary" class="breadcrumb-container"  style="margin-right: 20px; margin-top: 5px !important;">
+        上传文件
+      </el-button>
+     
+      <el-drawer title="我是标题" :visible.sync="drawer" :with-header="false">
+        <el-upload class="upload-demo" drag multiple  
+           :file-list="fileList" 
+           :before-upload="BeforeAvatarUpload"
+           :http-request="UploadFile"
+           :headers="headers"
+           >
+          <i class="el-icon-upload" style="font-size: 200px; line-height: 100%;"></i>
+          <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+        </el-upload>
+      </el-drawer>
+     
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
           <img :src="avatar" class="user-avatar">
@@ -29,8 +46,18 @@
 import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
-
+import axios from "axios"
+import { uploadFile } from '@/api/user'
 export default {
+  data(){
+    return{
+      drawer: false,
+      fileList: [],
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    }
+  },
   components: {
     Breadcrumb,
     Hamburger
@@ -38,7 +65,8 @@ export default {
   computed: {
     ...mapGetters([
       'sidebar',
-      'avatar'
+      'avatar',
+      'id',
     ])
   },
   methods: {
@@ -48,6 +76,27 @@ export default {
     async logout() {
       await this.$store.dispatch('user/logout')
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+    },
+    BeforeAvatarUpload(file){
+       const isLt2M = file.size / 1024 /1024 < 2;
+       console.log(file.size)
+       if(!isLt2M){
+         this.$message('上传的文件大小不可以超过2MB');
+       }
+       return isLt2M
+    },
+    UploadFile(file){
+      console.log(file)
+      let data = new FormData()
+      data.append('file', file.file)
+      console.log(data)
+      uploadFile(data).then(response => {
+         if(response.data.code == 200){
+            this.$message('文件上传成功');
+         }else{
+            this.$message('图片上传失败');
+         }
+      })
     }
   }
 }
@@ -86,7 +135,8 @@ export default {
     &:focus {
       outline: none;
     }
-
+    
+   
     .right-menu-item {
       display: inline-block;
       padding: 0 8px;
@@ -130,4 +180,13 @@ export default {
     }
   }
 }
+</style>
+
+<style>
+ .el-upload-dragger{
+   width: 530px;
+   height: 850px;
+   margin-left: 10px;
+   margin-top: 5px;
+ }
 </style>

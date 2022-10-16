@@ -10,5 +10,6 @@ const getters = {
   stature: state => state.user.stature,
   position: state => state.user.position,
   sex: state => state.user.sex,
+  id: state => state.user.id,
 }
 export default getters

@@ -29,14 +29,14 @@ module.exports = {
   assetsDir: 'static',
   lintOnSave: process.env.NODE_ENV === 'development',
   productionSourceMap: false,
-  devServer: {
+  devServer: {    //配置解决跨域问题  代理跨域
     port: port,
     open: true,
     overlay: {
       warnings: false,
       errors: true
     },
-    // before: require('./mock/mock-server.js')
+    // before: require('./mock/mock-server.js')  
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:8000',

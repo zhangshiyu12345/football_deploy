@@ -1,15 +1,18 @@
 import os
+import random
 
+from django.contrib.auth.mixins import LoginRequiredMixin
+from tool.send_notices import SendNotices
 from IPython.core.display import JSON
 from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
-
+from django.views.generic import ListView
 from football_platform import settings
-from .models import NewUser
+from .models import NewUser,Notification
 from rest_framework import viewsets,status
 from rest_framework.response import Response
-from user.serializers import UserSerializer,UpdateUserSerializer
+from user.serializers import UserSerializer,UpdateUserSerializer,NotificationSerializer
 from football_platform.settings import BASE_URL
 from django.core.mail import send_mail
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -18,9 +21,13 @@ from .serializers import MyTokenObtainPairSerializer
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page #在视图函数中使用,将视图结果存入缓存
 import json
+from tool.sms import YunTongXin
+from django.conf import settings
+from .tasks import send_sms_c,mongo_insert
+from notifications.signals import notify
 # Create your views here.
 
-MEDIA_ADDR = 'http://127.0.0.1:8000/media/'
+MEDIA_ADDR = '/media/'
 Position = ['前锋','左边锋','右边锋','前腰','中前卫','中后卫','左后卫','右后卫','门将']
 Sex = ['女','男']
 
@@ -42,23 +49,41 @@ class MyObtainTokenPairView(TokenObtainPairView):
 class UserInfoViewSet(viewsets.ViewSet):
     queryset = NewUser.objects.all().order_by('-date_joined')
     http_method_names = ['get']
-    @cache_page(300)  # 5分钟
+   # @cache_page(300)  # 5分钟
     def list(self, request, *args, **kwargs):
         print('ok')
-        user_info = NewUser.objects.filter(id=request.user.id).values()[0]
+        user_info = NewUser.objects.get(id=request.user.id)
         role = request.user.roles
+        #print(type(request.user))
+        #print(type(user_info))
         avatar = request.user.avatar
-        position = int(user_info['position'])
-        sex = int(user_info['sex'])
-        user_info['avatar'] = get_avatar_url(avatar)
-        user_info['position'] = Position[position]
-        user_info['sex'] = Sex[sex]
-        if role == 0:
-            user_info['roles'] = ['admin']
-        else:
-            user_info['roles'] = ['user']
+        position = int(user_info.position)
+        sex = int(user_info.sex)
+        #user_info.avatar = str(get_avatar_url(avatar))
+        #print(type(user_info.avatar))
+        user_info.position = Position[position]
+        user_info.sex = Sex[sex]
+        #notice = SendNotices()
+        #notice.send(request.user,request.user,'通知')  # 发送消息
+        #unread_list = notice.get_unread_list(request.user) #未读列表
 
-        return Response(user_info)
+        #print(str(unread_list))
+        try:
+            notices = Notification.objects.get(verb='平台用户通知')
+        except Exception as e:
+            print(request)
+            user = NewUser.objects.get(id=1)
+            notify.send(sender=user,recipient=request.user,verb='平台用户通知',target=None,description='尊敬的用户:\r\n   欢迎您使用足球数据分析平台')
+
+        if role == 0:
+            user_info.roles = ['admin']
+        else:
+            user_info.roles = ['user']
+
+        serializer = UserSerializer(instance=user_info, many=False)
+        print(serializer.data)
+        return Response(serializer.data)
+        #return Response(user_info)
 
 #获取所有用户信息
 #@cache_page(300) #5分钟
@@ -72,35 +97,35 @@ class UserViewSet(viewsets.ModelViewSet):
 class UserCreateViewSet(viewsets.ModelViewSet):
     queryset = NewUser.objects.all()
     serializer_class = UserSerializer
-    http_method_names = ['post', 'get']
+    http_method_names = ['post']
     permission_classes = []
 
-    #查看某一条数据
-    def retrieve(self, request, *args, **kwargs):
-        instance = NewUser.objects.get(code=kwargs['pk'])
-        instance.is_active = True
-        instance.save()
-        data = {
-            'status': 'success',
-        }
-        return Response(data, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
         #get_serializer:获取序列化对象
         serializer = self.get_serializer(data=request.data)#在内部实现了get_serializer_class()(获取序列化类)
         #或者:serialzer = self.get_serializer_class()(data=request.data)
         serializer.is_valid(raise_exception=True)
+        code = request.data['code']
+        phone = request.data['phone']
+        old_code = cache.get('sms_%s'%(phone))
+        if not old_code:
+
+            return Response({'status':'404'})
+
+        if int(code) != old_code:
+            return Response({'status': '404'})
         user_info = self.perform_create(serializer)
         user_info.set_password(request.data['password'])
-        user_info.is_active = False #刚开始注册的用户未被激活
+        user_info.is_active = True #刚开始注册的用户未被激活
         user_info.save()
-        code = user_info.code
-        # url = request.build_absolute_uri("/api/user_activate/" + str(code) + "/")
-        url = BASE_URL + "/api/user_activate/" + str(code)
-        print(url)
+        #url = request.build_absolute_uri("/api/user_activate/" + str(code) + "/")
+        #url = BASE_URL + "/api/user_activate/" + str(code)
+        #print(url)
 
         #发送邮件给用户激活
-        send_mail('用户激活', url,'15016299762@163.com',[user_info.email],fail_silently=False)
+        #send_mail('用户激活', url,'15016299762@163.com',[user_info.email],fail_silently=False)
+        #检查验证码是否正确
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
@@ -111,7 +136,8 @@ class UserCreateViewSet(viewsets.ModelViewSet):
 class UploadAvatarView(APIView):
     def post(self,request):
         file = request.data.get('file')
-        user_obj = NewUser.objects.get(id=5)
+        uid = request.data.get('id')
+        user_obj = NewUser.objects.get(id=uid)
         user_obj.avatar = file
         user_obj.save()
         media_path = "media/avatar"
@@ -121,6 +147,7 @@ class UploadAvatarView(APIView):
         with open(file_name, "wb") as f:
             # 写入字节流
             f.write(file.file.read())
+            print(type(file))
             # 返回响应
             data = {
                 "code": 200,
@@ -128,6 +155,20 @@ class UploadAvatarView(APIView):
                 'media_path': media_path,
             }
             return Response(data)
+
+class UploadFilesView(APIView):
+    def post(self,request):
+        file = request.data.get('file')
+        id = request.user.id
+        mongo_insert.delay(str(file.file.read()),id)
+        print(1111)
+        data = {
+            "code": 200,
+            'msg': "上传文件成功",
+        }
+        return Response(data)
+
+
 
 class UserUpdateViewSet(GenericAPIView):
     queryset = NewUser.objects.all()
@@ -137,30 +178,110 @@ class UserUpdateViewSet(GenericAPIView):
     def put(self, request, id):
         print(request.data)
         user_obj = NewUser.objects.get(id=id)
-        validated_data = UpdateUserSerializer(data=request.data, instance=user_obj)
+        for i in range(9):
+            if Position[i] == request.data['position']:
+                request.data['position'] = str(i)
+                break
+        validated_data = UpdateUserSerializer(data=request.data, instance=user_obj) #反序列化
         if validated_data.is_valid():
-            validated_data.save()
+            validated_data.save()  #返回数据对象实例
             return Response(validated_data.data)
         else:
             return Response(validated_data.errors)
 
 #获取个人信息
 class UserInfo(APIView):
-    @cache_page(300)  # 5分钟
     def get(self,request,username):
-        user_info = NewUser.objects.filter(username=username).values()[0]
+        print('000')
+        user_info = NewUser.objects.get(username=username)
         print(type(user_info))
-        position = int(user_info['position'])
-        sex = int(user_info['sex'])
-        avatar = user_info['avatar']
+        position = int(user_info.position)
+        sex = int(user_info.sex)
+        avatar = user_info.avatar
         print(avatar)
-        user_info['avatar'] = get_avatar_url(avatar)
-        user_info['position'] = Position[position]
-        user_info['sex'] = Sex[sex]
-        print(user_info['avatar'])
-        #serializer = UserSerializer(instance=user_info, many=False)
-        return Response(user_info)
+        user_info.avatar = get_avatar_url(avatar)
+        user_info.position = Position[position]
+        user_info.sex = Sex[sex]
+        print(user_info.avatar)
+        serializer = UserSerializer(instance=user_info, many=False)
+        return Response(serializer.data)
 
+class NoticeView(GenericAPIView):
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+    http_method_names = ['get','put','delete']
+
+    # 未读通知的查询集
+    def get(self,request):
+        #返回用户未读列表
+        notices = Notification.objects.filter(recipient=request.user.id)
+        serializer = self.get_serializer(instance=notices,many=True)
+
+        for data in serializer.data:
+            id = data['actor_object_id']
+            user = NewUser.objects.get(id=id)
+            data['actor'] = user.username
+        print(serializer.data)
+        return Response(serializer.data)
+
+    def put(self,request,id):
+        notice = Notification.objects.get(id=id)
+        serializer = self.get_serializer(instance=notice, data=request.data)
+        if serializer.is_valid():
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                return Response(serializer.errors)
+
+    def delete(self,request,id):
+        try:
+            Notification.objects.get(id=id).delete()
+        except Exception as e:
+            print(e)
+        data = {
+            "status": 200,
+            'msg': "删除文件成功",
+        }
+        return Response(data)
+
+
+
+
+
+#发送短信获取验证码
+class Sms(APIView):
+    http_method_names = ['post']
+    permission_classes = [] #不需要权限和认证就可以执行
+
+    def post(self,request):
+        phone = request.data['phone']
+        #生成验证码
+        code = random.randint(1000,9999)
+        #存储验证码 django-redis
+        cache_key = 'sms_%s'%(phone)
+        #检查是否有已发过的且未过期的验证码
+        old_code = cache.get(cache_key)
+        if old_code:
+            return Response({'status':'404'})
+        cache.set(cache_key,code,60) #60秒有效
+        #发送验证码
+        #send_sms(phone,code)
+        #celery版
+        send_sms_c.delay(phone,code) #启动celery(celery -A football_platform worker -l info) #推送到redis的队列里
+        return Response('')
+
+
+def send_sms(phone,code):
+    config = {
+        "accountSid": settings.ACCOUNTSID,
+        "accountToken": settings.ACCOUNTTOKEN,
+        "appId": settings.APPID,
+        "templateId": '1',
+    }
+    yun = YunTongXin(**config)  # 变为关键字传参
+    res = yun.run(phone, code)
+    return res
 
 
 

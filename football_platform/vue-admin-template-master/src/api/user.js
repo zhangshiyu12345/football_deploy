@@ -16,6 +16,30 @@ export function getInfo(token) {
   })
 }
 
+//获取未读通知
+export function getnotice(token){
+  return request({
+    url:'/api/notice/',
+    method: 'get',
+    params:{token}
+  })
+}
+
+export function updatenotice(data,id){
+  return request({
+    url:'/api/notice/' + id + '/',
+    method:'put',
+    data
+  })
+}
+
+export function deletenotice(id){
+  return request({
+    url:'/api/notice/delete/' + id + '/',
+    method:'delete',
+  })
+}
+
 export function logout() {
   return request({
     url: '/admin/acl/index/logout',
@@ -35,6 +59,16 @@ export function createUser(data){
 export function uploadImage(data){
   return request({
     url:'/api/avatar/',
+    method: 'post',
+    data
+  })
+}
+
+//上传文件
+export function uploadFile(data){
+  //发请求:axios发请求返回的是Promise对象
+  return request({
+    url:'/api/files/',
     method: 'post',
     data
   })
@@ -64,6 +98,15 @@ export function UserInfo(token,username){
     url:'/api/userinfo/' + username + '/',
     method: 'get',
     params:{token}
+  })
+}
+
+//上传手机号
+export function SendPhone(data){
+  return request({
+    url:'/api/sms/',
+    method: 'post',
+    data
   })
 }
 

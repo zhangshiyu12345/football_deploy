@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'user',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -179,3 +180,9 @@ CACHES = {
 #方式一　cache.set/get 具备序列化和反序列化
 #方式二 原生redis操作
 #方式三 装饰器
+
+ACCOUNTSID = '8aaf07087f77bf96017faa847ecb12ba'
+ACCOUNTTOKEN = '396dec387f0d45b2b96ca77400adec99'
+APPID = '8aaf07087f77bf96017faa847fe912c1'
+
+NOTIFICATIONS_NOTIFICATION_MODEL = 'user.Notification'

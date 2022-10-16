@@ -13,6 +13,7 @@ const getDefaultState = () => {
     stature:0,
     position: '',
     sex:0,
+    id: '',
   }
 }
 
@@ -48,7 +49,11 @@ const mutations = {
   },
   SET_SEX: (state, sex) => {
     state.sex = sex
-  }
+  },
+  SET_ID: (state, id) => {
+    state.id = id
+  },
+  
 }
 
 const actions = {
@@ -74,19 +79,21 @@ const actions = {
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
       getInfo(state.token).then(response => {
-        const { data } = response
+        const { data, avatar1 } = response
+        console.log(avatar1)
+        console.log(data)
+        data['avatar'] = 'http://127.0.0.1:8000' + data['avatar']
 
         if (!data) {
           reject('Verification failed, please Login again.')
         }
 
-        const { roles, username, avatar, weight, stature, age, position, sex } = data
+        const { roles, username, avatar, weight, stature, age, position, sex, id } = data
 
         // roles must be a non-empty array
         if (!roles || roles.length <= 0) {
           reject('getInfo: roles must be a non-null array!')
         }
-
         commit('SET_ROLES', roles)
         commit('SET_USERNAME', username)
         commit('SET_AVATAR', avatar)
@@ -95,6 +102,7 @@ const actions = {
         commit('SET_AGE', age)
         commit('SET_POSITION', position)
         commit('SET_SEX',sex)
+        commit('SET_ID',id)
         resolve(data)
       }).catch(error => {
         reject(error)
@@ -134,4 +142,3 @@ export default {
   mutations,
   actions
 }
-

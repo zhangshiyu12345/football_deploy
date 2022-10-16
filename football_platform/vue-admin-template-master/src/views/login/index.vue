@@ -78,6 +78,17 @@
           </el-select>
         </el-form-item>
 
+        <el-form-item label="手机号" prop="phone">
+          <el-input type="tel" v-model="ruleForm.phone" autocomplete="off"></el-input>
+        </el-form-item>
+
+        <el-form-item label="验证码" prop="code">
+          <el-input v-model="ruleForm.code" autocomplete="off"></el-input>
+          <el-button  :plain="true" @click.stop="sendVerificationCode" v-if="show">发送验证码</el-button>
+          <el-button  :plain="true" v-if="!show" disabled >{{count}}秒后重发</el-button>
+        </el-form-item>
+
+
         <el-form-item label="密码" prop="password">
           <el-input type="password" v-model="ruleForm.password" autocomplete="off"></el-input>
         </el-form-item>
@@ -95,8 +106,7 @@
 
 <script>
 import { validUsername } from '@/utils/validate'
-import { createUser } from '@/api/user'
-
+import { createUser, SendPhone } from '@/api/user'
 export default {
   name: 'Login',
   data() {
@@ -171,7 +181,20 @@ export default {
         callback()
       }
     }
+    const validatePhone = (rule, value, callback) => {
+      var ab = '/^1[345678]\d{9}$/'
+      var ab1 = '/^19[89]\d{8}$/'
+      var ab2 = '/^166\d{8}$/'
+      if(ab.test(value)||ab1.test(value)||ab2.test(value)){
+        callback();
+      }else{
+        callback('请输入正确的手机号')
+      }
+    }
     return {
+      show:true,
+      count: '',
+      timer:null,
       loginForm: {
         username: 'admin',
         password: '12345678'
@@ -193,6 +216,8 @@ export default {
           stature: '',
           sex: '',
           position: '',
+          phone: ' ',
+          code: ' ',
         },
       rules: {
         username: [
@@ -222,6 +247,9 @@ export default {
         stature: [
           { required: true, validator:validateStature, trigger: 'blur'}
         ],
+        phone: [
+          { required: true, validator:validatePhone, trigger: 'blur'}
+        ]
       },
       formLabelWidth: '120px',
       dialogFormVisible: false
@@ -263,33 +291,60 @@ export default {
       })
     },
     submitForm(formName) {
-        this.$refs[formName].validate((valid) => {
-          if (valid) {
-            
-            createUser(this.ruleForm).then(response => {
-              console.log(response)
-              if(response.status == 201) {
-                this.$message({
-                  message: '用户创建成功，请登录邮箱，激活用户。',
-                  type: 'success'
-                });
-              } else {    
-                this.$message({
-                  message: '用户创建失败，请重试。',
-                  type: 'error'
-                });
-              }
-            })
-          } else {
-            console.log('error submit!!');
-            return false;
-          }
-        });
+      createUser(this.ruleForm).then(response => {
+        console.log(response)
+        if (response.status == 201) {
+          this.$message({
+            message: '用户创建成功。',
+            type: 'success'
+          });
+        } else {
+          this.$message({
+            message: '用户创建失败',
+            type: 'error'
+          });
+        }
+      })
     },
     resetForm(formName) {
       this.$refs[formName].resetFields();
     },
-
+    sendVerificationCode(){
+      let TIME_COUNT = 60
+      if(!this.timer){
+        this.count = TIME_COUNT
+        this.show = false
+        this.timer = setInterval(() => {
+          if(this.count > 0 && this.count <= TIME_COUNT){
+            this.count--;
+          }else{
+            this.show = true;
+            clearInterval(this.timer)
+            this.timer = null
+          }
+        },1000);
+        this.getCode();
+      }
+    },
+    getCode(){
+       var data = {}
+       data['phone'] = this.ruleForm.phone
+       SendPhone(data).then(response => {
+        if(response.status == 200){
+          this.$message({
+          showClose: true,
+          message: '发送短信成功，请注意接收',
+          type: 'success'
+         });
+        }else{
+        this.$message({
+          showClose: true,
+          message: '发送短信失败或短信已发送，请稍后尝试',
+          type: 'error'
+      });
+        }
+       })
+    },
   }
 }
 </script>
@@ -297,24 +352,20 @@ export default {
 <style lang="scss">
 /* 修复input 背景不协调 和光标变色 */
 /* Detail see https://github.com/PanJiaChen/vue-element-admin/pull/927 */
-
 $bg:#283443;
 $light_gray:#fff;
 $cursor: #fff;
-
 @supports (-webkit-mask: none) and (not (cater-color: $cursor)) {
   .login-container .el-input input {
     color: $cursor;
   }
 }
-
 /* reset element-ui css */
 .login-container {
   .el-input {
     display: inline-block;
     height: 47px;
     width: 85%;
-
     input {
       background: transparent;
       border: 0px;
@@ -324,14 +375,12 @@ $cursor: #fff;
       color: $light_gray;
       height: 47px;
       caret-color: $cursor;
-
       &:-webkit-autofill {
         box-shadow: 0 0 0px 1000px $bg inset !important;
         -webkit-text-fill-color: $cursor !important;
       }
     }
   }
-
   .el-form-item {
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(0, 0, 0, 0.1);
@@ -345,13 +394,11 @@ $cursor: #fff;
 $bg:#2d3a4b;
 $dark_gray:#889aa4;
 $light_gray:#eee;
-
 .login-container {
   min-height: 100%;
   width: 100%;
   background-color: $bg;
   overflow: hidden;
-
   .login-form {
     position: relative;
     width: 520px;
@@ -360,19 +407,16 @@ $light_gray:#eee;
     margin: 0 auto;
     overflow: hidden;
   }
-
   .tips {
     font-size: 14px;
     color: #fff;
     margin-bottom: 10px;
-
     span {
       &:first-of-type {
         margin-right: 16px;
       }
     }
   }
-
   .svg-container {
     padding: 6px 5px 6px 15px;
     color: $dark_gray;
@@ -380,10 +424,8 @@ $light_gray:#eee;
     width: 30px;
     display: inline-block;
   }
-
   .title-container {
     position: relative;
-
     .title {
       font-size: 26px;
       color: $light_gray;
@@ -392,7 +434,6 @@ $light_gray:#eee;
       font-weight: bold;
     }
   }
-
   .show-pwd {
     position: absolute;
     right: 10px;

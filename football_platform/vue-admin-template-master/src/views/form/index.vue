@@ -147,15 +147,26 @@ export default {
     }
   },
   methods: {
-    onSubmit() {
+    async onSubmit() {  //异步函数
       let data = {}
       data['weight'] = this.form.weight
       data['stature'] = this.form.stature
       data['age'] = this.form.age
       data['username'] = this.form.username
+      data['position'] = this.form.position
+      data['phone'] = this.form.phone
       let id = this.form.id
-      let result = updateInfo(data,id)
+      //let result = updateInfo(data,id)
+      let result =  await this.$API.user.updateInfo(data,id) //在异步函数中调用异步函数
       console.log(result)
+       if(result.status == 200){
+        this.$message({
+            type: 'success',
+            message: '更新个人信息成功!'
+          });
+        this.UserInfoData(this.Token())
+       }
+      
     },
     onCancel() {
       this.$message({
@@ -179,6 +190,7 @@ export default {
        let result = await this.$API.user.getInfo(token)
        if(result.status == 200){
           this.form = result.data;
+          this.form['avatar'] = 'http://127.0.0.1:8000' +  this.form['avatar']
           console.log(result.data)
        }
     },
@@ -197,6 +209,7 @@ export default {
       console.log(file)
       let data = new FormData()
       data.append('file', file.file)
+      data.append('id', this.form.id)
       console.log(data)
       uploadImage(data).then(response => {
          if(response.data.code == 200){

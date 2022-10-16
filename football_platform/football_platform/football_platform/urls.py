@@ -19,8 +19,8 @@ from django.views.decorators.cache import cache_page
 from rest_framework import routers
 from django.conf import settings
 from django.conf.urls.static import static
-from user.views import UserViewSet, UserCreateViewSet, MyObtainTokenPairView, UserInfoViewSet, UploadAvatarView,UserUpdateViewSet,UserInfo
-
+from user.views import UserViewSet, UserCreateViewSet, MyObtainTokenPairView, UserInfoViewSet, UploadAvatarView,UserUpdateViewSet,UserInfo,Sms,UploadFilesView,NoticeView
+import notifications.urls
 # 导入 simplejwt 提供的几个验证视图类
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -37,11 +37,18 @@ router_V1.register(r'users',UserViewSet)
 urlpatterns = [
     path('api/', include(router_V1.urls)),
     path('admin/', admin.site.urls),
+    #path('xadmin/',xadmin.site.urls),
     # 获取Token的接口
     path('api/login/', MyObtainTokenPairView.as_view(), name='token_obtain_pair'),
     # 刷新Token有效期的接口
     path('api/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/avatar/', UploadAvatarView.as_view(), name='upload_avatar'),
+    path('api/files/', UploadFilesView.as_view(), name='upload_files'),
     path('api/user_update/<int:id>/', UserUpdateViewSet.as_view(), name="user_update"),
     path('api/userinfo/<str:username>/', UserInfo.as_view()),
+    path('api/sms/',Sms.as_view(),name='sms_phone'),
+    path('inbox/notifications/',include(notifications.urls,namespace='notifications')),
+    path('api/notice/',NoticeView.as_view(),name='notice'),
+    path('api/notice/<int:id>/',NoticeView.as_view(),name='update_notice'),
+    path('api/notice/delete/<int:id>/',NoticeView.as_view(),name='delete_notice')
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -226,7 +226,7 @@ export default {
     },
     indexMethod(index) {
         return index * 2;
-    }
+    },
   },
   computed: {
     ...mapGetters([
