@@ -20,6 +20,7 @@ from rest_framework import routers
 from django.conf import settings
 from django.conf.urls.static import static
 from user.views import UserViewSet, UserCreateViewSet, MyObtainTokenPairView, UserInfoViewSet, UploadAvatarView,UserUpdateViewSet,UserInfo,Sms,UploadFilesView,NoticeView
+from tream.views import MatchView,MatchDetailView,UploadTreamView,TreamCreateViewSet,UploadEmblemView,TreamInfo,TreamViewSet,UploadPlayerView,PlayerDetailView
 import notifications.urls
 # 导入 simplejwt 提供的几个验证视图类
 from rest_framework_simplejwt.views import (
@@ -32,6 +33,9 @@ router_V1.register('info', UserInfoViewSet)
 router_V1.register('user_activate', UserCreateViewSet)
 router_V1.register('users_create',UserCreateViewSet)
 router_V1.register(r'users',UserViewSet)
+router_V1.register(r'treams',TreamViewSet)
+router_V1.register(r'match',MatchView)
+router_V1.register(r'tream_create',TreamCreateViewSet)
 
 
 urlpatterns = [
@@ -50,5 +54,11 @@ urlpatterns = [
     path('inbox/notifications/',include(notifications.urls,namespace='notifications')),
     path('api/notice/',NoticeView.as_view(),name='notice'),
     path('api/notice/<int:id>/',NoticeView.as_view(),name='update_notice'),
-    path('api/notice/delete/<int:id>/',NoticeView.as_view(),name='delete_notice')
+    path('api/notice/delete/<int:id>/',NoticeView.as_view(),name='delete_notice'),
+    path("api/match_data/<int:match_id>/", MatchDetailView.as_view(),name='match_detail_data'),
+    path("api/player_data/<int:match_id>/", PlayerDetailView.as_view(),name='player_detail_data'),
+    path("api/tream/files",UploadTreamView.as_view(),name='upload_tream_files'),
+    path("api/tream_emblem/",UploadEmblemView.as_view(),name='upload_tream_emblem'),
+    path("api/treaminfo/<str:football_tream>/",TreamInfo.as_view()),
+    path("api/player/files",UploadPlayerView.as_view(),name='upload_player_files'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

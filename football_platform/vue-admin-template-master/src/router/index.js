@@ -67,7 +67,7 @@ export const constantRoutes = [
         path: 'table',
         name: 'Table',
         component: () => import('@/views/table/index'),
-        meta: { title: '仓库', icon: 'table' }
+        meta: { title: '硬件设备管理', icon: 'table' }
       },
       {
         path: 'tree',
@@ -77,6 +77,32 @@ export const constantRoutes = [
       }
     ]
   },
+
+  {
+    path: '/tream',
+    component: Layout,
+    redirect: '/tream/match',
+    name: 'Tream',
+    meta: { title: '球队管理', icon: 'el-icon-s-order' },
+    children: [
+      {
+        path: 'match',
+        name: 'Match',
+        component: () => import('@/views/match/index'),
+        meta: { title: '数据分析', icon: 'el-icon-s-data' }
+      },
+      {
+        path: '/process/:id',
+        name: 'Process',
+        component: () => import('@/views/process/index'),
+      },
+      {
+        path: '/player_tra/:id',
+        name: 'Player_tra',
+        component: () => import('@/views/player_tra/index'),
+      }
+    ]
+  }, 
 
   {
     path: '/form',

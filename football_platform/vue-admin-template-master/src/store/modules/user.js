@@ -14,6 +14,7 @@ const getDefaultState = () => {
     position: '',
     sex:0,
     id: '',
+    football_tream: '',
   }
 }
 
@@ -53,6 +54,9 @@ const mutations = {
   SET_ID: (state, id) => {
     state.id = id
   },
+  SET_FOOTBALL_TREAM: (state, football_tream) => {
+    state.football_tream = football_tream
+  }
   
 }
 
@@ -88,7 +92,7 @@ const actions = {
           reject('Verification failed, please Login again.')
         }
 
-        const { roles, username, avatar, weight, stature, age, position, sex, id } = data
+        const { roles, username, avatar, weight, stature, age, position, sex, id, football_tream } = data
 
         // roles must be a non-empty array
         if (!roles || roles.length <= 0) {
@@ -103,6 +107,7 @@ const actions = {
         commit('SET_POSITION', position)
         commit('SET_SEX',sex)
         commit('SET_ID',id)
+        commit('SET_FOOTBALL_TREAM',football_tream)
         resolve(data)
       }).catch(error => {
         reject(error)

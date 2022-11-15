@@ -37,7 +37,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class UpdateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = NewUser
-        fields = ['username', 'weight', 'stature', 'age', 'position','phone']
+        fields = ['username', 'weight', 'stature', 'age', 'position','phone','football_tream']
 
 
 class NotificationSerializer(serializers.ModelSerializer):

@@ -28,7 +28,7 @@ from notifications.signals import notify
 # Create your views here.
 
 MEDIA_ADDR = '/media/'
-Position = ['前锋','左边锋','右边锋','前腰','中前卫','中后卫','左后卫','右后卫','门将']
+Position = [ '中锋', '边锋', '前腰', '后腰', '中前卫', '左前卫', '右前卫', '中后卫', '左后卫', '右后卫', '门将']
 Sex = ['女','男']
 
 
@@ -52,33 +52,38 @@ class UserInfoViewSet(viewsets.ViewSet):
    # @cache_page(300)  # 5分钟
     def list(self, request, *args, **kwargs):
         print('ok')
+        print(request.user.id)
         user_info = NewUser.objects.get(id=request.user.id)
-        role = request.user.roles
-        #print(type(request.user))
-        #print(type(user_info))
-        avatar = request.user.avatar
-        position = int(user_info.position)
-        sex = int(user_info.sex)
-        #user_info.avatar = str(get_avatar_url(avatar))
-        #print(type(user_info.avatar))
-        user_info.position = Position[position]
-        user_info.sex = Sex[sex]
-        #notice = SendNotices()
-        #notice.send(request.user,request.user,'通知')  # 发送消息
-        #unread_list = notice.get_unread_list(request.user) #未读列表
+        roles = request.user.roles
+        print(roles)
+        if roles == 1:
+            #print(type(request.user))
+            #print(type(user_info))
+            avatar = request.user.avatar
+            position = int(user_info.position)
+            sex = int(user_info.sex)
+            #user_info.avatar = str(get_avatar_url(avatar))
+            #print(type(user_info.avatar))
+            user_info.position = Position[position]
+            user_info.sex = Sex[sex]
+            #notice = SendNotices()
+            #notice.send(request.user,request.user,'通知')  # 发送消息
+            #unread_list = notice.get_unread_list(request.user) #未读列表
 
-        #print(str(unread_list))
+            #print(str(unread_list))
         try:
             notices = Notification.objects.get(verb='平台用户通知')
         except Exception as e:
             print(request)
-            user = NewUser.objects.get(id=1)
+            user = NewUser.objects.get(id=7)
             notify.send(sender=user,recipient=request.user,verb='平台用户通知',target=None,description='尊敬的用户:\r\n   欢迎您使用足球数据分析平台')
 
-        if role == 0:
-            user_info.roles = ['admin']
+        if roles == 0:
+            user_info.roles = 'admin'
+        elif roles == 1:
+            user_info.roles = 'user'
         else:
-            user_info.roles = ['user']
+            user_info.roles = 'coach'
 
         serializer = UserSerializer(instance=user_info, many=False)
         print(serializer.data)
@@ -90,7 +95,6 @@ class UserInfoViewSet(viewsets.ViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = NewUser.objects.all()
     serializer_class = UserSerializer
-
 
 
 
@@ -134,27 +138,31 @@ class UserCreateViewSet(viewsets.ModelViewSet):
 
 
 class UploadAvatarView(APIView):
-    def post(self,request):
-        file = request.data.get('file')
-        uid = request.data.get('id')
-        user_obj = NewUser.objects.get(id=uid)
-        user_obj.avatar = file
-        user_obj.save()
-        media_path = "media/avatar"
-        file_path = os.path.join(settings.BASE_DIR, media_path)
-        file_name = os.path.join(file_path, file.name)
-        # wb  以二进制形式写入
-        with open(file_name, "wb") as f:
-            # 写入字节流
-            f.write(file.file.read())
-            print(type(file))
-            # 返回响应
-            data = {
-                "code": 200,
-                'msg': "上传图片成功",
-                'media_path': media_path,
-            }
-            return Response(data)
+
+    def post(self, request):
+       file = request.data.get('file')
+       uid = request.data.get('id')
+       user_obj = NewUser.objects.get(id=uid)
+       user_obj.avatar = 'avatar/' + file.name
+       user_obj.save()
+       media_path = "media/avatar"
+       file_path = os.path.join(settings.BASE_DIR, media_path)
+       file_name = os.path.join(file_path, file.name)
+       # wb  以二进制形式写入
+       with open(file_name, "wb") as f:
+           # 写入字节流
+           f.write(file.file.read())
+           print(file.file.read())
+           print(type(file))
+           # 返回响应
+           data = {
+               "code": 200,
+               'msg': "上传图片成功",
+               'media_path': media_path,
+           }
+           return Response(data)
+
+
 
 class UploadFilesView(APIView):
     def post(self,request):
@@ -178,10 +186,11 @@ class UserUpdateViewSet(GenericAPIView):
     def put(self, request, id):
         print(request.data)
         user_obj = NewUser.objects.get(id=id)
-        for i in range(9):
-            if Position[i] == request.data['position']:
-                request.data['position'] = str(i)
-                break
+        if request.data['flag'] == 0:
+            for i in range(9):
+                if Position[i] == request.data['position']:
+                    request.data['position'] = str(i)
+                    break
         validated_data = UpdateUserSerializer(data=request.data, instance=user_obj) #反序列化
         if validated_data.is_valid():
             validated_data.save()  #返回数据对象实例
@@ -194,12 +203,18 @@ class UserInfo(APIView):
     def get(self,request,username):
         print('000')
         user_info = NewUser.objects.get(username=username)
+        if user_info.roles == 'coach':
+            data = {
+                'code':200,
+                'msg':'请输入球员姓名',
+            }
+            return Response(data)
         print(type(user_info))
         position = int(user_info.position)
         sex = int(user_info.sex)
         avatar = user_info.avatar
         print(avatar)
-        user_info.avatar = get_avatar_url(avatar)
+        #user_info.avatar = get_avatar_url(avatar)
         user_info.position = Position[position]
         user_info.sex = Sex[sex]
         print(user_info.avatar)

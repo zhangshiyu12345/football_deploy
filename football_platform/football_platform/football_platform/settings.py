@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'simpleui',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,8 +44,10 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'user',
     'notifications',
+    'tream',
 ]
 
+#注册中间件
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -54,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'middleware.user_middleware.UserMiddleware',
 ]
 
 ROOT_URLCONF = 'football_platform.urls'
@@ -170,6 +174,7 @@ EMAIL_HOST_PASSWORD = 'TCFYDIWTREVUPYRD'
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
+        #"BACKEND": "redis://:127.0.0.1:6379/0",
         "LOCATION": "redis://127.0.0.1:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",

@@ -5,7 +5,7 @@
       <div>
         <el-image style="width: 250px; height: 250px" :src="avatar"></el-image>
         <div style="margin-top:10px;">
-          <el-input v-model="input1" placeholder="搜索姓名" class="inp1"></el-input>
+          <el-input v-model="input1" placeholder="搜索球员姓名" class="inp1"></el-input>
           <el-button type="primary" @click="UserInfoData1">搜索</el-button>
         </div>
       </div>
@@ -13,7 +13,7 @@
       <div style="margin-left:200px;">
         <el-image style="width: 250px; height: 250px" :src="avatar1"></el-image>
         <div style="margin-top:10px;">
-          <el-input v-model="input2" placeholder="搜索姓名" class="inp2"></el-input>
+          <el-input v-model="input2" placeholder="搜索球员姓名" class="inp2"></el-input>
           <el-button type="primary" @click="UserInfoData2">搜索</el-button>
         </div>
       </div>
@@ -95,7 +95,7 @@ export default {
     async UserInfoData1(){
        let result = await this.$API.user.UserInfo(this.token,this.input1)
        if(result.status == 200){
-           this.avatar = result.data.avatar
+           this.avatar = 'http://127.0.0.1:8000' + result.data.avatar
            this.tableData[0].score1 = result.data.body
            this.tableData[1].score1 = result.data.defend
            this.tableData[2].score1 = result.data.speed
@@ -108,7 +108,7 @@ export default {
     async UserInfoData2(){
        let result = await this.$API.user.UserInfo(this.token,this.input2)
        if(result.status == 200){
-          this.avatar1 = result.data.avatar
+          this.avatar1 = 'http://127.0.0.1:8000' + result.data.avatar
           this.tableData[0].score2 = result.data.body
           this.tableData[1].score2 = result.data.defend
           this.tableData[2].score2 = result.data.speed

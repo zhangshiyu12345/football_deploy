@@ -11,5 +11,6 @@ const getters = {
   position: state => state.user.position,
   sex: state => state.user.sex,
   id: state => state.user.id,
+  football_tream: state => state.user.football_tream,
 }
 export default getters

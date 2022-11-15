@@ -65,6 +65,7 @@ export default {
       title:'',
       content:'',
       token:'',
+      status:false,
     }
   },
   methods:{

@@ -30,7 +30,8 @@
         @click.native.prevent="handleLogin">登陆</el-button>
 
       <div class="tips">
-        <el-button type="text" @click="dialogFormVisible = true">注册用户</el-button>
+        <el-button type="text" @click="dialogFormVisible = true">球员注册</el-button>
+        <el-button type="text" @click="dialogFormVisible1 = true">教练注册</el-button>
         <!-- <span style="margin-right:20px;">username: admin</span>
         <span> password: any</span> -->
       </div>
@@ -66,16 +67,22 @@
 
         <el-form-item label="位置" prop="position">
           <el-select v-model="ruleForm.position" placeholder="请选择位置">
-            <el-option label="前锋" value="0"></el-option>
-            <el-option label="左边锋" value="1"></el-option>
-            <el-option label="右边锋" value="2"></el-option>
-            <el-option label="前腰" value="3"></el-option>
+            <el-option label="中锋" value="0"></el-option>
+            <el-option label="边锋" value="1"></el-option>
+            <el-option label="前腰" value="2"></el-option>
+            <el-option label="后腰" value="3"></el-option>
             <el-option label="中前卫" value="4"></el-option>
-            <el-option label="中后卫" value="5"></el-option>
-            <el-option label="左后卫" value="6"></el-option>
-            <el-option label="右后卫" value="7"></el-option>
-            <el-option label="门将" value="8"></el-option>
+            <el-option label="左前卫" value="5"></el-option>
+            <el-option label="右前卫" value="6"></el-option>
+            <el-option label="中后卫" value="7"></el-option>
+            <el-option label="左后卫" value="8"></el-option>
+            <el-option label="右后卫" value="9"></el-option>
+            <el-option label="门将" value="10"></el-option>
           </el-select>
+        </el-form-item>
+
+        <el-form-item label="球队名称" prop="football_tream">
+          <el-input v-model="ruleForm.football_tream" autocomplete="off"></el-input>
         </el-form-item>
 
         <el-form-item label="手机号" prop="phone">
@@ -101,12 +108,57 @@
         <el-button type="primary" @click="dialogFormVisible = false; submitForm('ruleForm')">确 定</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog title="注册" :visible.sync="dialogFormVisible1">
+      <el-form :model="ruleForm1" status-icon :rules="rules" ref="ruleForm1" label-width="100px" class="demo-ruleForm">
+        <el-form-item label="用户名" prop="username">
+          <el-input type="text" v-model="ruleForm1.username" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input type="text" v-model="ruleForm1.email" autocomplete="off"></el-input>
+        </el-form-item>
+
+        <el-form-item label="性别" prop="sex">
+          <el-select v-model="ruleForm1.sex" placeholder="请选择性别">
+            <el-option label="男" value="1"></el-option>
+            <el-option label="女" value="0"></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="球队名称" prop="football_tream">
+          <el-input v-model="ruleForm1.football_tream" autocomplete="off"></el-input>
+        </el-form-item>
+
+        <el-form-item label="手机号" prop="phone">
+          <el-input type="tel" v-model="ruleForm1.phone" autocomplete="off"></el-input>
+        </el-form-item>
+
+        <el-form-item label="验证码" prop="code">
+          <el-input v-model="ruleForm1.code" autocomplete="off"></el-input>
+          <el-button  :plain="true" @click.stop="sendVerificationCode1" v-if="show">发送验证码</el-button>
+          <el-button  :plain="true" v-if="!show" disabled >{{count}}秒后重发</el-button>
+        </el-form-item>
+
+
+        <el-form-item label="密码" prop="password">
+          <el-input type="password" v-model="ruleForm1.password" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="确认密码" prop="checkPassword">
+          <el-input type="password" v-model="ruleForm1.checkPassword" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible1 = false">取 消</el-button>
+        <el-button type="primary" @click="dialogFormVisible1 = false; submitForm1('ruleForm1');CreaTream();">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { validUsername } from '@/utils/validate'
-import { createUser, SendPhone } from '@/api/user'
+import { createUser, SendPhone  } from '@/api/user'
+import {  createtream } from '@/api/tream'
 export default {
   name: 'Login',
   data() {
@@ -131,7 +183,7 @@ export default {
     var validatePass2 = (rule, value, callback) => {
       if (value === '') {
         callback(new Error('请再次输入密码'));
-      } else if (value !== this.ruleForm.password) {
+      } else if (value != this.ruleForm.password) {
         callback(new Error('两次输入密码不一致!'));
       } else {
         callback();
@@ -182,13 +234,11 @@ export default {
       }
     }
     const validatePhone = (rule, value, callback) => {
-      var ab = '/^1[345678]\d{9}$/'
-      var ab1 = '/^19[89]\d{8}$/'
-      var ab2 = '/^166\d{8}$/'
-      if(ab.test(value)||ab1.test(value)||ab2.test(value)){
-        callback();
-      }else{
-        callback('请输入正确的手机号')
+     
+    }
+    const validateTream = (rule, value, callback) => {
+      if(value == ''){
+        callback(new Error('请输入您所在球队'))
       }
     }
     return {
@@ -218,7 +268,23 @@ export default {
           position: '',
           phone: ' ',
           code: ' ',
-        },
+          football_tream: '',
+          roles:0,
+      },
+      ruleForm1:{
+          phone:'',
+          username:'',
+          code:'',
+          password:'',
+          checkPassword:'',
+          email:'',
+          sex:'',
+          football_tream:'',
+          roles:2,
+      },
+      data2:{
+          name:'',
+      },
       rules: {
         username: [
           { required: true, trigger: 'blur', message: '请输入用户名' }
@@ -249,10 +315,14 @@ export default {
         ],
         phone: [
           { required: true, validator:validatePhone, trigger: 'blur'}
-        ]
+        ],
+        football_tream: [
+          { required: true, validator:validateTream, trigger: 'blur'}
+        ],
       },
       formLabelWidth: '120px',
-      dialogFormVisible: false
+      dialogFormVisible: false,
+      dialogFormVisible1: false,
     }
   },
   watch: {
@@ -306,6 +376,39 @@ export default {
         }
       })
     },
+    submitForm1(formName) {
+      createUser(this.ruleForm1).then(response => {
+        console.log(response)
+        if (response.status == 201) {
+          this.$message({
+            message: '用户创建成功。',
+            type: 'success'
+          });
+        } else {
+          this.$message({
+            message: '用户创建失败',
+            type: 'error'
+          });
+        }
+      })
+    },
+    CreaTream(){
+      this.data2.name = this.ruleForm1.football_tream
+      createtream(this.data2).then(response => {
+        console.log(response)
+        if (response.status == 200) {
+          this.$message({
+            message: '球队创建成功。',
+            type: 'success'
+          });
+        } else {
+          this.$message({
+            message: '球队创建失败',
+            type: 'error'
+          });
+        }
+      })
+    },
     resetForm(formName) {
       this.$refs[formName].resetFields();
     },
@@ -326,9 +429,45 @@ export default {
         this.getCode();
       }
     },
+    sendVerificationCode1(){
+      let TIME_COUNT = 60
+      if(!this.timer){
+        this.count = TIME_COUNT
+        this.show = false
+        this.timer = setInterval(() => {
+          if(this.count > 0 && this.count <= TIME_COUNT){
+            this.count--;
+          }else{
+            this.show = true;
+            clearInterval(this.timer)
+            this.timer = null
+          }
+        },1000);
+        this.getCode1();
+      }
+    },
     getCode(){
        var data = {}
        data['phone'] = this.ruleForm.phone
+       SendPhone(data).then(response => {
+        if(response.status == 200){
+          this.$message({
+          showClose: true,
+          message: '发送短信成功，请注意接收',
+          type: 'success'
+         });
+        }else{
+        this.$message({
+          showClose: true,
+          message: '发送短信失败或短信已发送，请稍后尝试',
+          type: 'error'
+      });
+        }
+       })
+    },
+    getCode1(){
+       var data = {}
+       data['phone'] = this.ruleForm1.phone
        SendPhone(data).then(response => {
         if(response.status == 200){
           this.$message({

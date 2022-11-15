@@ -16,6 +16,7 @@ export function getInfo(token) {
   })
 }
 
+
 //获取未读通知
 export function getnotice(token){
   return request({
@@ -74,6 +75,7 @@ export function uploadFile(data){
   })
 }
 
+
 //修改用户信息
 export function updateInfo(data,id){
   return request({
@@ -109,4 +111,5 @@ export function SendPhone(data){
     data
   })
 }
+
 

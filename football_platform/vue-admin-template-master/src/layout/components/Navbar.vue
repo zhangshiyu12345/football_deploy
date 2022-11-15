@@ -7,9 +7,9 @@
     <div class="right-menu">
     
       <el-button @click="drawer = true" type="primary" class="breadcrumb-container"  style="margin-right: 20px; margin-top: 5px !important;">
-        上传文件
+        上传个人文件
       </el-button>
-     
+      
       <el-drawer title="我是标题" :visible.sync="drawer" :with-header="false">
         <el-upload class="upload-demo" drag multiple  
            :file-list="fileList" 
@@ -182,8 +182,8 @@ export default {
 }
 </style>
 
-<style>
- .el-upload-dragger{
+<style scoped>
+.el-upload-dragger{
    width: 530px;
    height: 850px;
    margin-left: 10px;
