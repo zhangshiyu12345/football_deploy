@@ -60,5 +60,4 @@ urlpatterns = [
     path("api/tream/files",UploadTreamView.as_view(),name='upload_tream_files'),
     path("api/tream_emblem/",UploadEmblemView.as_view(),name='upload_tream_emblem'),
     path("api/treaminfo/<str:football_tream>/",TreamInfo.as_view()),
-    path("api/player/files",UploadPlayerView.as_view(),name='upload_player_files'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

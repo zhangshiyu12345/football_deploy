@@ -2,20 +2,26 @@
     <el-tabs type="border-card" class="box-card" v-loading="loading"  element-loading-background="rgb(255, 255, 255)">
       <span style="margin-left:449px; margin-top: 5px;">{{ football_tream }}队</span>
       <el-button type="text" style="margin-left:10px;" @click="dialogVisible1 = true">分析</el-button> 
-      <el-dialog title="数据分析" :visible.sync="dialogVisible1" width="100%" :fullscreen="fullscreen" :before-close="handleClose1">
+      <el-dialog title="数据分析" :visible.sync="dialogVisible1"  :before-close="handleClose1">
         <span>
           <el-tabs v-model="activeName" @tab-click="handleClick">
             <el-tab-pane label="传球网络" name="first">
-              <img :src="this.imd">
+              <img style="height:500px;" src="http://127.0.0.1:8000/media/images/1.png">
             </el-tab-pane>
             <el-tab-pane label="拓扑距离矩阵" name="third">
-                <img :src="this.matrix" >
+                <img src="http://127.0.0.1:8000/media/images/2.png" >
             </el-tab-pane>
             <el-tab-pane label="时间比图" name="fourth">
-                <img :src="this.time_cart" > 
+                <img src="http://127.0.0.1:8000/media/images/3.png" > 
             </el-tab-pane>
-            <el-tab-pane label="K-means聚类" name="five">
+            <el-tab-pane label="球场区域跑动图" name="five">
+                <img style="height:500px;" src="http://127.0.0.1:8000/media/images/4.png" > 
+            </el-tab-pane>
+            <el-tab-pane label="聚类分析" name="six">
                 <img :src="this.outcome" > 
+            </el-tab-pane>
+            <el-tab-pane label="时间聚类结果" name="seven">
+                <img style="height:500px;" src="http://127.0.0.1:8000/media/images/5.png" > 
             </el-tab-pane>
           </el-tabs>
         </span>
@@ -30,13 +36,19 @@
         <span>
           <el-tabs v-model="activeName" @tab-click="handleClick">
             <el-tab-pane label="传球网络" name="first">
-              <img :src="this.imd1">
+                <img src="http://127.0.0.1:8000/media/images/1.png">
             </el-tab-pane>
             <el-tab-pane label="拓扑距离矩阵" name="third">
-                <img :src="this.matrix1" >
+                <img src="http://127.0.0.1:8000/media/images/2.png" >
             </el-tab-pane>
             <el-tab-pane label="时间比图" name="fourth">
-                <img :src="this.time_cart1" > 
+                <img src="http://127.0.0.1:8000/media/images/3.png" > 
+            </el-tab-pane>
+            <el-tab-pane label="球场区域跑动图" name="fourth">
+                <img src="http://127.0.0.1:8000/media/images/4.png" > 
+            </el-tab-pane>
+            <el-tab-pane label="K-means聚类" name="five">
+                <img :src="this.outcome" > 
             </el-tab-pane>
           </el-tabs>
         </span>
@@ -344,7 +356,7 @@ import jQuery from 'jquery'
                  temp1_M.push(member1[i][1]);
                 }
                 if(member1[i][0].indexOf('F') != -1){
-                 temp1_F.push(member1[i][0]);
+                 temp1_F.push('Huskies_F5');
                 }
             }
           }

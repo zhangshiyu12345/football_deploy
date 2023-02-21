@@ -11,8 +11,8 @@ class MatchAdmin(admin.ModelAdmin):
 admin.site.register(Match, MatchAdmin)
 
 class TreamAdmin(admin.ModelAdmin):
-    list_display = ('name','tream_emblem')
-    list_display_links = ('name','tream_emblem')
-    search_fields = ('name',)
+    list_display = ('name','tream_emblem','area','home_hall','famous_person','main_honor','chairman','owner','founding_time')
+    list_display_links = ('name','tream_emblem','area','home_hall','famous_person','main_honor','chairman','owner','founding_time')
+    search_fields = ('name','area','home_hall','famous_person','main_honor','chairman','owner','founding_time')
 
 admin.site.register(FootballTream,TreamAdmin)

@@ -30,7 +30,7 @@
               </el-upload>
             </el-form-item>
 
-            <el-form-item label="球队队徽">
+            <el-form-item label="球队队徽" v-if="this.roles == 'coach'">
               <el-upload 
               :auto-upload="ture" 
               style="width:550px;" 
@@ -108,7 +108,7 @@
           </div>
         </el-col>
 
-        <el-col :span="5">
+        <el-col :span="5" v-if="this.roles == 'coach'">
           <div class="demo-image__preview">
             <el-image style="width: 300px; height: 300px" :src="this.tream_emblem" >
             </el-image>
@@ -117,7 +117,23 @@
 
       </el-row>
     </el-card>
-
+    <el-card class="box-card" style="width:1550px;margin-top:20px;">
+      <div slot="header" class="clearfix">
+        <span>修改密码</span>
+      </div>
+      <el-form :model="form1" status-icon :rules="rules1" ref="form1" label-width="100px" class="demo-ruleForm">
+        <el-form-item label="原密码" prop="oldpass">
+          <el-input type="password"  v-model="form1.oldpass" autocomplete="off" style="width:550px;"></el-input>
+        </el-form-item>
+        <el-form-item label="新密码" prop="newpass">
+          <el-input type="password" v-model="form1.newpass" autocomplete="off" style="width:550px;"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="onSubmit3('form1')">提交</el-button>
+          <el-button @click="resetForm('ruleForm')">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
   </div>
 </template>
 
@@ -156,12 +172,28 @@ export default {
         callback();
       }
     };
+    var validateoldpass = (rule, value, callback) => {
+        if (value === '') {
+          callback(new Error('请输入密码'));
+        } else {
+          callback();
+        }
+    };
+    var validatenewpass = (rule, value, callback) => {
+        if (value === '') {
+          callback(new Error('请再次输入密码'));
+        } else {
+          callback();
+        }
+    };
     return {
       releseList:{
 					logo:''
 			},
 			isHidden:true,
       form:{
+      },
+      form1:{
       },
       rules:{
         username: [
@@ -178,6 +210,14 @@ export default {
         ],
         stature: [
           { required: true, validator:validateStature, trigger: 'blur'}
+        ],
+      },
+      rules1:{
+        oldpass: [
+          { validator: validateoldpass, trigger: 'blur' }
+        ],
+        newpass: [
+          { validator: validatenewpass, trigger: 'blur' }
         ],
       },
       fileList: [],
@@ -200,6 +240,7 @@ export default {
       data['username'] = this.form.username
       data['position'] = this.form.position
       data['phone'] = this.form.phone
+      data['password'] = this.form.password
       data['flag'] = 0
       let id = this.form.id
       //let result = updateInfo(data,id)
@@ -219,6 +260,7 @@ export default {
       data['username'] = this.form.username
       data['football_tream'] = this.form.football_tream
       data['phone'] = this.form.phone
+      data['password'] = this.form.password
       data['flag'] = 1
       let id = this.form.id
       let result =  await this.$API.user.updateInfo(data,id) //在异步函数中调用异步函数
@@ -229,6 +271,26 @@ export default {
             type: 'success',
             message: '更新个人信息成功!'
           });
+        this.UserInfoData(this.Token())
+       }
+    },
+    async onSubmit3(){
+      let data = {}
+      data['password'] = this.form1.oldpass
+      data['newpass'] = this.form1.newpass
+      data['phone'] = this.form.phone
+      data['username'] = this.form.username
+      data['flag'] = 2
+      let id = this.form.id
+      let result = await this.$API.user.updateInfo(data,id)
+      if(result.status == 200){
+        console.log(1111)
+        console.log(result.data)
+        this.$message({
+            type: 'success',
+            message: '更改密码成功!'
+          });
+        console.log(result.data['password'])
         this.UserInfoData(this.Token())
        }
     },
@@ -313,7 +375,7 @@ export default {
     this.UserInfoData(this.Token());
     //console.log(this.Token());
     //console.log(this.$API)
-  }
+  },
 }
 </script>
 

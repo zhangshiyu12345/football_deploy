@@ -7,7 +7,6 @@ class SendNotices():
     #verb:动作
     def send(self,actor,recipient,verb,target=None,description=None):
         notify.send(sender=actor,recipient=recipient,verb=verb,target=target,description=description,level='danger')
-
     #获取未读列表
     def get_unread_list(self,user):
         return user.notifications.unread()

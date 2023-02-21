@@ -43,6 +43,7 @@ def draw(tream,treams_member_dict,file_name1):
     member_D = []
     member_M = []
     member_F = []
+
     # 后卫
     for j in tream_member:
        if isinstance(j,list) == False:

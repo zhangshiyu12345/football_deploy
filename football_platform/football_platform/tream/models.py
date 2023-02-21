@@ -46,6 +46,14 @@ class Match(models.Model):
 class FootballTream(models.Model):
     name = models.CharField(verbose_name='球队名称',max_length=256)
     tream_emblem = models.ImageField(verbose_name='球队队徽',upload_to='tream',default='default.jpg')
+    area = models.CharField(verbose_name='所属地区',max_length=256)
+    home_hall = models.CharField(verbose_name='主场馆',max_length=256)
+    famous_person = models.CharField(verbose_name='知名人物',max_length=1024)
+    main_honor = models.CharField(verbose_name='主要荣誉',max_length=1024)
+    chairman = models.CharField(verbose_name='主席',max_length=256)
+    owner = models.CharField(verbose_name='拥有者',max_length=256)
+    founding_time = models.CharField(verbose_name='成立时间',max_length=256)
+    tream_history = models.TextField(verbose_name='球队历史')
 
     class Meta:
         db_table = 'Tream'

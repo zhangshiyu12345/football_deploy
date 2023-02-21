@@ -5,23 +5,20 @@
     <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
-    
-      <el-button @click="drawer = true" type="primary" class="breadcrumb-container"  style="margin-right: 20px; margin-top: 5px !important;">
+
+      <el-button @click="drawer = true" type="primary" class="breadcrumb-container"
+        style="margin-right: 20px; margin-top: 5px !important;">
         上传个人文件
       </el-button>
-      
+
       <el-drawer title="我是标题" :visible.sync="drawer" :with-header="false">
-        <el-upload class="upload-demo" drag multiple  
-           :file-list="fileList" 
-           :before-upload="BeforeAvatarUpload"
-           :http-request="UploadFile"
-           :headers="headers"
-           >
-          <i class="el-icon-upload" style="font-size: 200px; line-height: 100%;"></i>
+        <el-upload class="upload-demo" drag multiple style="margin-top:200px;margin-left:70px;" :file-list="fileList"
+          :before-upload="BeforeAvatarUpload" :http-request="UploadFile" :headers="headers">
+          <i class="el-icon-upload" style="line-height: 100%;"></i>
           <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
         </el-upload>
       </el-drawer>
-     
+
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
           <img :src="avatar" class="user-avatar">
@@ -30,12 +27,14 @@
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
           <router-link to="/">
             <el-dropdown-item>
-              主页
+              首页
             </el-dropdown-item>
           </router-link>
+
           <el-dropdown-item divided @click.native="logout">
             <span style="display:block;">退出</span>
           </el-dropdown-item>
+
         </el-dropdown-menu>
       </el-dropdown>
     </div>
@@ -49,13 +48,13 @@ import Hamburger from '@/components/Hamburger'
 import axios from "axios"
 import { uploadFile } from '@/api/user'
 export default {
-  data(){
-    return{
+  data() {
+    return {
       drawer: false,
       fileList: [],
       headers: {
         'Content-Type': 'multipart/form-data'
-      }
+      },
     }
   },
   components: {
@@ -77,27 +76,29 @@ export default {
       await this.$store.dispatch('user/logout')
       this.$router.push(`/login?redirect=${this.$route.fullPath}`)
     },
-    BeforeAvatarUpload(file){
-       const isLt2M = file.size / 1024 /1024 < 2;
-       console.log(file.size)
-       if(!isLt2M){
-         this.$message('上传的文件大小不可以超过2MB');
-       }
-       return isLt2M
+    BeforeAvatarUpload(file) {
+      const isLt2M = file.size / 1024 / 1024 < 2;
+      console.log(file.size)
+      if (!isLt2M) {
+        this.$message('上传的文件大小不可以超过2MB');
+      }
+      return isLt2M
     },
-    UploadFile(file){
+    UploadFile(file) {
       console.log(file)
       let data = new FormData()
       data.append('file', file.file)
       console.log(data)
       uploadFile(data).then(response => {
-         if(response.data.code == 200){
-            this.$message('文件上传成功');
-         }else{
-            this.$message('图片上传失败');
-         }
+        if (response.data.code == 200) {
+          this.$message('文件上传成功');
+          this.$router.push({ name: 'Depot', params: { data: response.data.member_anal } })
+
+        } else {
+          this.$message('图片上传失败');
+        }
       })
-    }
+    },
   }
 }
 </script>
@@ -108,7 +109,7 @@ export default {
   overflow: hidden;
   position: relative;
   background: #fff;
-  box-shadow: 0 1px 4px rgba(0,21,41,.08);
+  box-shadow: 0 1px 4px rgba(0, 21, 41, .08);
 
   .hamburger-container {
     line-height: 46px;
@@ -116,7 +117,7 @@ export default {
     float: left;
     cursor: pointer;
     transition: background .3s;
-    -webkit-tap-highlight-color:transparent;
+    -webkit-tap-highlight-color: transparent;
 
     &:hover {
       background: rgba(0, 0, 0, .025)
@@ -135,8 +136,8 @@ export default {
     &:focus {
       outline: none;
     }
-    
-   
+
+
     .right-menu-item {
       display: inline-block;
       padding: 0 8px;
@@ -183,10 +184,5 @@ export default {
 </style>
 
 <style scoped>
-.el-upload-dragger{
-   width: 530px;
-   height: 850px;
-   margin-left: 10px;
-   margin-top: 5px;
- }
+
 </style>

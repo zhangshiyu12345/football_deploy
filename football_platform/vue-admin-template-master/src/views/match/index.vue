@@ -6,20 +6,20 @@
       <el-input v-model="input" style="float: right; width: 250px;" placeholder="请输入相应赛季"></el-input>
     </div>
     
-    <div class="cont" style="width:100%;height:700px;scroll-snap-type: y mandatory;overflow-y: scroll;">
+    <div class="cont" style="width:100%;height:650px;scroll-snap-type: y mandatory;overflow-y: scroll;">
     <el-card style="margin:20px 0; margin-left: 15px;" v-for="match in match_data">
       <el-container>
         <el-aside width="200px" style="height:150px; width:150px; font-size:40px;display: flex; background-color: gold;" v-if="match.outcome == '胜'">
           <span style="margin-top: 50px;margin-left: 50px;">{{ match.outcome }}</span>
-          <span style="font-size:12px;">{{ match.name }}</span>
+          <span style="font-size:12px;width:50px;">{{ match.name }}第{{ match.match_id }}场</span>
         </el-aside>
         <el-aside width="200px" style="height:150px; width:150px; font-size:40px;display: flex; background-color: red;" v-else-if="match.outcome == '败'">
           <span style="margin-top: 50px;margin-left: 50px;">{{ match.outcome }}</span>
-          <span style="font-size:12px;">{{ match.name }}</span>
+          <span style="font-size:12px;width:50px;">{{ match.name }}第{{ match.match_id }}场</span>
         </el-aside>
         <el-aside width="200px" style="height:150px; width:150px; font-size:40px;display: flex; background-color: grey;" v-else-if="match.outcome == '平'">
           <span style="margin-top: 50px;margin-left: 50px;">{{ match.outcome }}</span>
-          <span style="font-size:12px;">{{ match.name }}</span>
+          <span style="font-size:12px;width:50px;">{{ match.name }}第{{ match.match_id }}场</span>
         </el-aside>
        <el-container>
           <el-main style="height:150px;display: flex;overflow: hidden;background-color: aliceblue;">
@@ -31,8 +31,7 @@
                <span style="margin-top: 50px;margin-left: 100px;font-size: 25px;">{{ match.opponent_id }}</span>
                <span style=""><img style="height:150px;width: 150px;margin-left: 200px;" :src="match.tream_emblem" ></span>
                <span style="margin-left:-10px;">
-               <el-button type="text" style="float:right; margin-top: 35px;margin-left: 20px;margin-right: 20px;" @click="dialogVisible = true; handle(match.match_id);">比赛详情</el-button> 
-               <el-button type="text" style="float:right; margin-top: px;margin-left: 20px;margin-right: 20px;" @click="dialogVisible1 = true; handle(match.match_id);">比赛复盘</el-button> 
+               <el-button type="text" style="margin-top: 50px;margin-left: 20px;" @click="dialogVisible = true; handle(match.match_id);">比赛详情</el-button> 
                </span>
                <!--对话框-->
                <el-dialog title="提示" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
@@ -70,27 +69,7 @@
               </span>
                </el-dialog>
 
-                <!--对话框-->
-               <el-dialog title="提示" :visible.sync="dialogVisible1" width="30%" :before-close="handleClose">
-              <span>
-                <el-upload class="upload-demo" drag 
-                     :before-upload="BeforeAvatarUpload"
-                     :http-request="UploadFile3"
-                     :file-list="fileList3" 
-                     :headers="headers"
-                     limit=1
-                     action="https://jsonplaceholder.typicode.com/posts/" multiple>
-                  <i class="el-icon-upload"></i>
-                  <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                  <div class="el-upload__tip" slot="tip">上传球员比赛轨迹</div>
-                </el-upload>
-              </span>
-
-              <span slot="footer" class="dialog-footer">
-                <el-button @click="dialogVisible1 = false">取 消</el-button>
-                <el-button type="primary" @click="dialogVisible1 = false; skip1();">确 定</el-button>
-              </span>
-               </el-dialog>
+              
 
           </el-main>
         </el-container>
@@ -115,7 +94,6 @@ import jQuery from 'jquery'
         input: '',
         data: '',
         dialogVisible: false,
-        dialogVisible1: false,
         fileList: [],
         fileList2: [],
         fileList3: [],
@@ -195,11 +173,6 @@ import jQuery from 'jquery'
             this.$router.push({name:'Process',params:{match_id:this.match_id}})
         }
       },
-      skip1(){
-        if(this.confirm2 == true){
-            this.$router.push({name:'Player_tra',params:{match_id:this.match_id}})
-        }
-      },
       handleClose(done) {
         this.$confirm('确认关闭？')
           .then(_ => {
@@ -240,20 +213,6 @@ import jQuery from 'jquery'
             this.$message('fullevents.xlsx文件上传成功');
          }else{
              this.$message('fullevents.xlsx上传失败');
-         }
-      })
-      },
-      UploadFile3(file){
-      console.log(file)
-      let data = new FormData()
-      data.append('file', file.file)
-      console.log(data)
-      uploadplayerFile(data).then(response => {
-         if(response.data.code == 200){
-            this.confirm2 = true
-            this.$message('文件上传成功');
-         }else{
-             this.$message('文件上传失败');
          }
       })
       },

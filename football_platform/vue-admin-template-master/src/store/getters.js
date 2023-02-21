@@ -12,5 +12,15 @@ const getters = {
   sex: state => state.user.sex,
   id: state => state.user.id,
   football_tream: state => state.user.football_tream,
+  pass_football: state => state.user.pass_football,
+  hotshot: state => state.user.hotshot,
+  speed_num: state => state.user.speed_num,
+  join_time: state => state.user.join_time,
+  sprint_distance: state => state.user.sprint_distance,
+  run_distance: state => state.user.run_distance,
+  sprint_num: state => state.user.sprint_num,
+  heart_avg: state => state.user.heart_avg,
+  phone: state => state.user.phone,
+  password: state => state.user.password,
 }
 export default getters

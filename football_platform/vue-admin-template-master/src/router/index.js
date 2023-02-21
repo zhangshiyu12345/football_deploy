@@ -55,26 +55,26 @@ export const constantRoutes = [
     },
   ]
   },
-
   {
-    path: '/example',
+    path: '/footballer',
     component: Layout,
-    redirect: '/example/table',
-    name: 'Example',
-    meta: { title: '数据管理', icon: 'el-icon-s-help' },
+    redirect: '/footballer/player',
+    name: 'Footballer',
+    meta: { title: '球员管理', icon: 'el-icon-s-help' },
     children: [
       {
-        path: 'table',
-        name: 'Table',
-        component: () => import('@/views/table/index'),
-        meta: { title: '硬件设备管理', icon: 'table' }
+        path: 'depot',
+        name: 'Depot',
+        component: () => import('@/views/depot/index'),
+        meta: { title: '球员身体素质分析', icon: 'el-icon-s-custom' }
       },
+
       {
-        path: 'tree',
-        name: 'Tree',
-        component: () => import('@/views/tree/index'),
-        meta: { title: '对比', icon: 'tree' }
-      }
+        path: 'player',
+        name: 'Player',
+        component: () => import('@/views/player/index'),
+        meta: { title: '数据对比', icon: 'tree' }
+      },
     ]
   },
 
@@ -129,16 +129,6 @@ export const constantRoutes = [
       }
     ]
     
-  },
-  {
-    path: 'external-link',
-    component: Layout,
-    children: [
-      {
-        path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
-        meta: { title: 'External Link', icon: 'link' }
-      }
-    ]
   },
 
   // 404 page must be placed at the end !!!

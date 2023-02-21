@@ -1,6 +1,7 @@
 import os
 import random
-
+from celery.result import AsyncResult
+from football_platform.celery import app
 from django.contrib.auth.mixins import LoginRequiredMixin
 from tool.send_notices import SendNotices
 from IPython.core.display import JSON
@@ -25,6 +26,7 @@ from tool.sms import YunTongXin
 from django.conf import settings
 from .tasks import send_sms_c,mongo_insert
 from notifications.signals import notify
+from django.contrib.auth.hashers import check_password
 # Create your views here.
 
 MEDIA_ADDR = '/media/'
@@ -75,8 +77,8 @@ class UserInfoViewSet(viewsets.ViewSet):
             notices = Notification.objects.get(verb='平台用户通知')
         except Exception as e:
             print(request)
-            user = NewUser.objects.get(id=7)
-            notify.send(sender=user,recipient=request.user,verb='平台用户通知',target=None,description='尊敬的用户:\r\n   欢迎您使用足球数据分析平台')
+            user = NewUser.objects.get(id=16)
+            notify.send(sender=user,recipient=request.user,verb='平台用户通知',target=None,description='尊敬的用户:\r\n   欢迎您使用足球训练分析平台')
 
         if roles == 0:
             user_info.roles = 'admin'
@@ -168,11 +170,14 @@ class UploadFilesView(APIView):
     def post(self,request):
         file = request.data.get('file')
         id = request.user.id
-        mongo_insert.delay(str(file.file.read()),id)
+        member_anal=mongo_insert.delay(str(file.file.read()),id)
+        async_task = AsyncResult(id=member_anal.id,app=app)
+        print(async_task.get())
         print(1111)
         data = {
             "code": 200,
             'msg': "上传文件成功",
+            'member_anal':async_task.get()
         }
         return Response(data)
 
@@ -191,6 +196,13 @@ class UserUpdateViewSet(GenericAPIView):
                 if Position[i] == request.data['position']:
                     request.data['position'] = str(i)
                     break
+        if request.data['flag'] == 2:
+            oldpass = request.data['password']
+            print(check_password(oldpass,user_obj.password))
+            if check_password(oldpass,user_obj.password):
+                print(999999)
+                user_obj.set_password(request.data['newpass'])
+                user_obj.save()
         validated_data = UpdateUserSerializer(data=request.data, instance=user_obj) #反序列化
         if validated_data.is_valid():
             validated_data.save()  #返回数据对象实例

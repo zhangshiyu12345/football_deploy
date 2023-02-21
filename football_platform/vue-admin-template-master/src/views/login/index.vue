@@ -2,11 +2,9 @@
   <div class="login-container">
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on"
       label-position="left">
-
       <div class="title-container">
         <h3 class="title">登录</h3>
       </div>
-
       <el-form-item prop="username">
         <span class="svg-container">
           <svg-icon icon-class="user" />
@@ -14,7 +12,6 @@
         <el-input ref="username" v-model="loginForm.username" placeholder="Username" name="username" type="text"
           tabindex="1" auto-complete="on" />
       </el-form-item>
-
       <el-form-item prop="password">
         <span class="svg-container">
           <svg-icon icon-class="password" />
@@ -25,19 +22,16 @@
           <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
         </span>
       </el-form-item>
-
       <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;"
-        @click.native.prevent="handleLogin">登陆</el-button>
-
+        @click.native.prevent="handleLogin">登录</el-button>
       <div class="tips">
         <el-button type="text" @click="dialogFormVisible = true">球员注册</el-button>
         <el-button type="text" @click="dialogFormVisible1 = true">教练注册</el-button>
         <!-- <span style="margin-right:20px;">username: admin</span>
         <span> password: any</span> -->
       </div>
-
     </el-form>
-    <el-dialog title="注册" :visible.sync="dialogFormVisible">
+    <el-dialog title="球员注册" :visible.sync="dialogFormVisible">
       <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
         <el-form-item label="用户名" prop="username">
           <el-input type="text" v-model="ruleForm.username" autocomplete="off"></el-input>
@@ -45,26 +39,21 @@
         <el-form-item label="邮箱" prop="email">
           <el-input type="text" v-model="ruleForm.email" autocomplete="off"></el-input>
         </el-form-item>
-
         <el-form-item label="年龄" prop="age">
           <el-input v-model.number="ruleForm.age"></el-input>
         </el-form-item>
-
         <el-form-item label="体重(公斤)" prop="weight">
           <el-input v-model.number="ruleForm.weight"></el-input>
         </el-form-item>
-        
         <el-form-item label="身高(cm)" prop="stature">
           <el-input v-model.number="ruleForm.stature"></el-input>
         </el-form-item>
-        
         <el-form-item label="性别" prop="sex">
           <el-select v-model="ruleForm.sex" placeholder="请选择性别">
             <el-option label="男" value="1"></el-option>
             <el-option label="女" value="0"></el-option>
           </el-select>
         </el-form-item>
-
         <el-form-item label="位置" prop="position">
           <el-select v-model="ruleForm.position" placeholder="请选择位置">
             <el-option label="中锋" value="0"></el-option>
@@ -80,22 +69,17 @@
             <el-option label="门将" value="10"></el-option>
           </el-select>
         </el-form-item>
-
         <el-form-item label="球队名称" prop="football_tream">
           <el-input v-model="ruleForm.football_tream" autocomplete="off"></el-input>
         </el-form-item>
-
         <el-form-item label="手机号" prop="phone">
           <el-input type="tel" v-model="ruleForm.phone" autocomplete="off"></el-input>
         </el-form-item>
-
         <el-form-item label="验证码" prop="code">
           <el-input v-model="ruleForm.code" autocomplete="off"></el-input>
           <el-button  :plain="true" @click.stop="sendVerificationCode" v-if="show">发送验证码</el-button>
           <el-button  :plain="true" v-if="!show" disabled >{{count}}秒后重发</el-button>
         </el-form-item>
-
-
         <el-form-item label="密码" prop="password">
           <el-input type="password" v-model="ruleForm.password" autocomplete="off"></el-input>
         </el-form-item>
@@ -108,8 +92,7 @@
         <el-button type="primary" @click="dialogFormVisible = false; submitForm('ruleForm')">确 定</el-button>
       </div>
     </el-dialog>
-
-    <el-dialog title="注册" :visible.sync="dialogFormVisible1">
+    <el-dialog title="教练注册" :visible.sync="dialogFormVisible1">
       <el-form :model="ruleForm1" status-icon :rules="rules" ref="ruleForm1" label-width="100px" class="demo-ruleForm">
         <el-form-item label="用户名" prop="username">
           <el-input type="text" v-model="ruleForm1.username" autocomplete="off"></el-input>
@@ -117,29 +100,23 @@
         <el-form-item label="邮箱" prop="email">
           <el-input type="text" v-model="ruleForm1.email" autocomplete="off"></el-input>
         </el-form-item>
-
         <el-form-item label="性别" prop="sex">
           <el-select v-model="ruleForm1.sex" placeholder="请选择性别">
             <el-option label="男" value="1"></el-option>
             <el-option label="女" value="0"></el-option>
           </el-select>
         </el-form-item>
-
         <el-form-item label="球队名称" prop="football_tream">
           <el-input v-model="ruleForm1.football_tream" autocomplete="off"></el-input>
         </el-form-item>
-
         <el-form-item label="手机号" prop="phone">
           <el-input type="tel" v-model="ruleForm1.phone" autocomplete="off"></el-input>
         </el-form-item>
-
         <el-form-item label="验证码" prop="code">
           <el-input v-model="ruleForm1.code" autocomplete="off"></el-input>
           <el-button  :plain="true" @click.stop="sendVerificationCode1" v-if="show">发送验证码</el-button>
           <el-button  :plain="true" v-if="!show" disabled >{{count}}秒后重发</el-button>
         </el-form-item>
-
-
         <el-form-item label="密码" prop="password">
           <el-input type="password" v-model="ruleForm1.password" autocomplete="off"></el-input>
         </el-form-item>
@@ -154,7 +131,6 @@
     </el-dialog>
   </div>
 </template>
-
 <script>
 import { validUsername } from '@/utils/validate'
 import { createUser, SendPhone  } from '@/api/user'
@@ -234,7 +210,6 @@ export default {
       }
     }
     const validatePhone = (rule, value, callback) => {
-     
     }
     const validateTream = (rule, value, callback) => {
       if(value == ''){
@@ -487,7 +462,6 @@ export default {
   }
 }
 </script>
-
 <style lang="scss">
 /* 修复input 背景不协调 和光标变色 */
 /* Detail see https://github.com/PanJiaChen/vue-element-admin/pull/927 */
@@ -528,7 +502,6 @@ $cursor: #fff;
   }
 }
 </style>
-
 <style lang="scss" scoped>
 $bg:#2d3a4b;
 $dark_gray:#889aa4;
@@ -538,6 +511,8 @@ $light_gray:#eee;
   width: 100%;
   background-color: $bg;
   overflow: hidden;
+  background: url('http://127.0.0.1:8000/media/images/football.jpeg') no-repeat;
+  background-size: 100% 100%;
   .login-form {
     position: relative;
     width: 520px;

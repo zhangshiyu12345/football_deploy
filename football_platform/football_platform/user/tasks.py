@@ -25,6 +25,9 @@ def send_sms_c(phone,code):
 def mongo_insert(file,id):
     mongo = Mongo()
     mongo.connectdb(file,id)
+    data = mongo.analysis(id)
+    print(data)
+    return data
 
 
 

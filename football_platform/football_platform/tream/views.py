@@ -19,7 +19,7 @@ from .tasks import csv_pre,pass_count,player_anal
 from football_platform.celery import app
 
 class MatchView(viewsets.ModelViewSet):
-    queryset = Match.objects.all()
+    queryset = Match.objects.all().order_by('-match_id')
     serializer_class = MatchSerializers
 
 class TreamViewSet(viewsets.ModelViewSet):
