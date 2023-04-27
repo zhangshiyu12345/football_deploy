@@ -22,6 +22,7 @@ from django.conf.urls.static import static
 from user.views import UserViewSet, UserCreateViewSet, MyObtainTokenPairView, UserInfoViewSet, UploadAvatarView,UserUpdateViewSet,UserInfo,Sms,UploadFilesView,NoticeView
 from tream.views import MatchView,MatchDetailView,UploadTreamView,TreamCreateViewSet,UploadEmblemView,TreamInfo,TreamViewSet,UploadPlayerView,PlayerDetailView
 import notifications.urls
+from django.views.generic import TemplateView
 # 导入 simplejwt 提供的几个验证视图类
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -39,6 +40,7 @@ router_V1.register(r'tream_create',TreamCreateViewSet)
 
 
 urlpatterns = [
+    path('',TemplateView.as_view(template_name="index.html")),
     path('api/', include(router_V1.urls)),
     path('admin/', admin.site.urls),
     #path('xadmin/',xadmin.site.urls),
